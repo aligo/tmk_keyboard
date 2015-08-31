@@ -24,11 +24,32 @@ void led_set(uint8_t usb_led)
 {
     if (usb_led & (1<<USB_LED_CAPS_LOCK)) {
         // output low
-        DDRB |= (1<<2);
-        PORTB &= ~(1<<2);
-    } else {
+        DDRC |= (1<<PC7);
+        PORTC &= ~(1<<PC7);
+    }
+    else {
         // Hi-Z
-        DDRB &= ~(1<<2);
-        PORTB &= ~(1<<2);
+        DDRC &= ~(1<<PC7);
+        PORTC &= ~(1<<PC7);
+    }
+    if (usb_led & (1<<USB_LED_NUM_LOCK)) {
+        // output low
+        DDRE |= (1<<PE6);
+        PORTE &= ~(1<<PE6);
+    }
+    else {
+        // Hi-Z
+        DDRE &= ~(1<<PE6);
+        PORTE &= ~(1<<PE6);
+    }
+    if (usb_led & (1<<USB_LED_SCROLL_LOCK)) {
+        // output high
+        DDRC |= (1<<PC6);
+        PORTC |= (1<<PC6);
+    }
+    else {
+        // Hi-Z
+        DDRC &= ~(1<<PC6);
+        PORTC &= ~(1<<PC6);
     }
 }
