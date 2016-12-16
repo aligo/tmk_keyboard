@@ -26,6 +26,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "debug.h"
 #include "util.h"
 #include "matrix.h"
+#ifdef PS2_MOUSE_ENABLE
+#include "ps2.h"
+#endif
+
 
 #ifndef DEBOUNCE
 #   define DEBOUNCE 5
@@ -38,9 +42,17 @@ static matrix_row_t matrix_debouncing[MATRIX_ROWS];
 
 static matrix_row_t read_cols(void);
 static void init_cols(void);
-static void init_rows(void);
 static void unselect_rows(void);
 static void select_row(uint8_t row);
+
+#ifdef PS2_MOUSE_ENABLE
+static uint8_t ps2_mouse_detected;
+
+uint8_t ps2_enabled(void)
+{
+    return ps2_mouse_detected;
+}
+#endif
 
 inline
 uint8_t matrix_rows(void)
@@ -60,8 +72,21 @@ void matrix_init(void)
     MCUCR = (1<<JTD);
     MCUCR = (1<<JTD);
 
+#ifdef PS2_MOUSE_ENABLE
+    // ps2 mouse detect
+    DDRF &= ~(1<<PF5 | 1<<PF4);
+    PORTF |= (1<<PF5 | 1<<PF4);
+    if (PINF & (1<<PF5 | 1 <<PF4)) {
+        ps2_mouse_detected = 0;
+    }
+    else {
+        ps2_mouse_detected = 1;
+    }
+    DDRF |= (1<<PF5 | 1<<PF4);
+#endif
+
     // initialize row and col
-    init_rows();
+    unselect_rows();
     init_cols();
 
     // initialize matrix state: all keys off
@@ -75,6 +100,9 @@ uint8_t matrix_scan(void)
 {
     for (uint8_t i = 0; i < MATRIX_ROWS; i++) {
         select_row(i);
+#ifdef HYBRID_MATRIX
+        init_cols();
+#endif
         _delay_us(30);  // without this wait read unstable value.
         matrix_row_t cols = read_cols();
         if (matrix_debouncing[i] != cols) {
@@ -138,64 +166,121 @@ uint8_t matrix_key_count(void)
 }
 
 /* Column pin configuration
- * col: 0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17
- * pin: F4  F1  F0  B3  D0  D1  D4  D5  D6  D7  F7  F6  D2  D3  B6  B5  B4  F5
+ * pin: F1  F0  E6  D7  D6  D4  C7  C6  B6  B5  B4  B3  B1  B0  (Rev.A)
+ * pin: F1  F0  E6  D7  D6  D4  C7  C6  B7  B6  B5  B4  B3  B1  (Rev.B)
+ * pin: F1  F0  E6  D7  D6  D4  C7  C6  B7  B5  B4  B3  B1  B0  (Rev.CHN/CNY)
  */
 static void  init_cols(void)
 {
     // Input with pull-up(DDR:0, PORT:1)
-    DDRF  &= ~(1<<PF7 | 1<<PF6 | 1<<PF5 | 1<<PF4 | 1<<PF1 | 1<<PF0);
-    PORTF |=  (1<<PF7 | 1<<PF6 | 1<<PF5 | 1<<PF4 | 1<<PF1 | 1<<PF0);
-    DDRD  &= ~(1<<PD7 | 1<<PD6 | 1<<PD5 | 1<<PD4 | 1<<PD3 | 1<<PD2 | 1<<PD1 | 1<<PD0);
-    PORTD |=  (1<<PD7 | 1<<PD6 | 1<<PD5 | 1<<PD4 | 1<<PD3 | 1<<PD2 | 1<<PD1 | 1<<PD0);
-    DDRB  &= ~(1<<PB6 | 1<<PB5 | 1<<PB4 | 1<<PB3);
-    PORTB |=  (1<<PB6 | 1<<PB5 | 1<<PB4 | 1<<PB3);
+    DDRF  &= ~(1<<PF1 | 1<<PF0);
+    PORTF |=  (1<<PF1 | 1<<PF0);
+    DDRE  &= ~(1<<PE6);
+    PORTE |=  (1<<PE6);
+    DDRD  &= ~(1<<PD7 | 1<<PD6 | 1<<PD4);
+    PORTD |=  (1<<PD7 | 1<<PD6 | 1<<PD4);
+    DDRC  &= ~(1<<PC7 | 1<<PC6);
+    PORTC |=  (1<<PC7 | 1<<PC6);
+#if defined(GH60_REV_CHN) || defined(GH60_REV_CNY)
+    DDRB  &= ~(1<<PB7 | 1<<PB5 | 1<<PB4 | 1<<PB3 | 1<<PB1 | 1<<PB0);
+    PORTB |=  (1<<PB7 | 1<<PB5 | 1<<PB4 | 1<<PB3 | 1<<PB1 | 1<<PB0);
+#else
+    DDRB  &= ~(1<<PB7 | 1<<PB6 | 1<<PB5 | 1<<PB4 | 1<<PB3 | 1<<PB1 | 1<<PB0);
+    PORTB |=  (1<<PB7 | 1<<PB6 | 1<<PB5 | 1<<PB4 | 1<<PB3 | 1<<PB1 | 1<<PB0);
+#endif
 }
 
+/* Column pin configuration
+ * col: 0   1   2   3   4   5   6   7   8   9   10  11  12  13
+ * pin: F0  F1  E6  C7  C6  B6  D4  B1  B0  B5  B4  D7  D6  B3  (Rev.A)
+ * pin: F0  F1  E6  C7  C6  B6  D4  B1  B7  B5  B4  D7  D6  B3  (Rev.B)
+ * pin: F0  F1  E6  C7  C6  B7  D4  B1  B0  B5  B4  D7  D6  B3  (Rev.CHN)
+ * pin: F0  F1  E6  C7  C6  B7  D4  B0  B1  B5  B4  D7  D6  B3  (Rev.CNY)
+ */
 static matrix_row_t read_cols(void)
 {
-    return (PINF&(1<<PF4) ? 0 : (1<<0)) |
+#if defined(GH60_REV_CHN)
+    return (PINF&(1<<PF0) ? 0 : (1<<0)) |
            (PINF&(1<<PF1) ? 0 : (1<<1)) |
-           (PINF&(1<<PF0) ? 0 : (1<<2)) |
-           (PINB&(1<<PB3) ? 0 : (1<<3)) |
-           (PIND&(1<<PD0) ? 0 : (1<<4)) |
-           (PIND&(1<<PD1) ? 0 : (1<<5)) |
+           (PINE&(1<<PE6) ? 0 : (1<<2)) |
+           (PINC&(1<<PC7) ? 0 : (1<<3)) |
+           (PINC&(1<<PC6) ? 0 : (1<<4)) |
+           (PINB&(1<<PB7) ? 0 : (1<<5)) |
            (PIND&(1<<PD4) ? 0 : (1<<6)) |
-           (PIND&(1<<PD5) ? 0 : (1<<7)) |
-           (PIND&(1<<PD6) ? 0 : (1<<8)) |
-           (PIND&(1<<PD7) ? 0 : (1<<9)) |
-           (PINF&(1<<PF7) ? 0 : (1<<10)) |
-           (PINF&(1<<PF6) ? 0 : (1<<11)) |
-           (PIND&(1<<PD2) ? 0 : (1<<12)) |
-           (PIND&(1<<PD3) ? 0 : (1<<13)) |
-           (PINB&(1<<PB6) ? 0 : (1<<14)) |
-           (PINB&(1<<PB5) ? 0 : (1UL<<15)) |
-           (PINB&(1<<PB4) ? 0 : (1UL<<16)) |
-           (PINF&(1<<PF5) ? 0 : (1UL<<17));
+           (PINB&(1<<PB1) ? 0 : (1<<7)) |
+           (PINB&(1<<PB0) ? 0 : (1<<8)) |
+           (PINB&(1<<PB5) ? 0 : (1<<9)) |
+           (PINB&(1<<PB4) ? 0 : (1<<10)) |
+           (PIND&(1<<PD7) ? 0 : (1<<11)) |
+           (PIND&(1<<PD6) ? 0 : (1<<12)) |
+           (PINB&(1<<PB3) ? 0 : (1<<13));
+#elif defined(GH60_REV_CNY)
+    return (PINF&(1<<PF0) ? 0 : (1<<0)) |
+           (PINF&(1<<PF1) ? 0 : (1<<1)) |
+           (PINE&(1<<PE6) ? 0 : (1<<2)) |
+           (PINC&(1<<PC7) ? 0 : (1<<3)) |
+           (PINC&(1<<PC6) ? 0 : (1<<4)) |
+           (PINB&(1<<PB7) ? 0 : (1<<5)) |
+           (PIND&(1<<PD4) ? 0 : (1<<6)) |
+           (PINB&(1<<PB0) ? 0 : (1<<7)) |
+           (PINB&(1<<PB1) ? 0 : (1<<8)) |
+           (PINB&(1<<PB5) ? 0 : (1<<9)) |
+           (PINB&(1<<PB4) ? 0 : (1<<10)) |
+           (PIND&(1<<PD7) ? 0 : (1<<11)) |
+           (PIND&(1<<PD6) ? 0 : (1<<12)) |
+           (PINB&(1<<PB3) ? 0 : (1<<13));
+#else
+    return (PINF&(1<<0) ? 0 : (1<<0)) |
+           (PINF&(1<<1) ? 0 : (1<<1)) |
+           (PINE&(1<<6) ? 0 : (1<<2)) |
+           (PINC&(1<<7) ? 0 : (1<<3)) |
+           (PINC&(1<<6) ? 0 : (1<<4)) |
+           (PINB&(1<<6) ? 0 : (1<<5)) |
+           (PIND&(1<<4) ? 0 : (1<<6)) |
+           (PINB&(1<<1) ? 0 : (1<<7)) |
+           ((PINB&(1<<0) && PINB&(1<<7)) ? 0 : (1<<8)) |     // Rev.A and B
+           (PINB&(1<<5) ? 0 : (1<<9)) |
+           (PINB&(1<<4) ? 0 : (1<<10)) |
+           (PIND&(1<<7) ? 0 : (1<<11)) |
+           (PIND&(1<<6) ? 0 : (1<<12)) |
+           (PINB&(1<<3) ? 0 : (1<<13));
+#endif
 }
 
 /* Row pin configuration
- * row:     0   1   2   3   4   5   x
- * pin: B2  0   1   0   1   0   1   1
- *      B1  0   0   1   1   0   0   1
- *      B0  0   0   0   0   1   1   1
+ * row: 0   1   2   3   4
+ * pin: D0  D1  D2  D3  D5
  */
-static void init_rows(void)
-{
-    DDRB  |= (1<<PB2 | 1<<PB1 | 1<<PB0);
-}
-
 static void unselect_rows(void)
 {
-    //PORTB |= (1<<PB2 | 1<<PB1 | 1<<PB0);
-    PORTB |= (1<<PB2);
-    PORTB |= (1<<PB1);
-    PORTB |= (1<<PB0);
+    // Hi-Z(DDR:0, PORT:0) to unselect
+    DDRD  &= ~0b00101111;
+    PORTD &= ~0b00101111;
 }
 
 static void select_row(uint8_t row)
 {
-    (row & (1<<0)) ? (PORTB |= (1<<PB2)) : (PORTB &= ~(1<<PB2));
-    (row & (1<<1)) ? (PORTB |= (1<<PB1)) : (PORTB &= ~(1<<PB1));
-    (row & (1<<2)) ? (PORTB |= (1<<PB0)) : (PORTB &= ~(1<<PB0));
+    // Output low(DDR:1, PORT:0) to select
+    switch (row) {
+        case 0:
+            DDRD  |= (1<<0);
+            PORTD &= ~(1<<0);
+            break;
+        case 1:
+            DDRD  |= (1<<1);
+            PORTD &= ~(1<<1);
+            break;
+        case 2:
+            DDRD  |= (1<<2);
+            PORTD &= ~(1<<2);
+            break;
+        case 3:
+            DDRD  |= (1<<3);
+            PORTD &= ~(1<<3);
+            break;
+        case 4:
+            DDRD  |= (1<<5);
+            PORTD &= ~(1<<5);
+            break;
+    }
 }
