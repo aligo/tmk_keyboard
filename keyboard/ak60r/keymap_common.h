@@ -63,24 +63,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     NO,  NO,  K4A, K4B, K4C,                K4J,                K4K, K4L, K4M, K4N, K4P, K4Q, K4R, K4S  \
 )
 
-/* ANSI valiant. No extra keys for ISO */
-#define KEYMAP_ANSI( \
-    K0A, K0B, K0C, K0D, K0E, K0F, K0G, K0H, K0I, K0J, K0K, K0L, K0M, K0N, K0P, K0Q, K0R, K0S, \
-    K1A, K1B, K1C, K1D, K1E, K1F, K1G, K1H, K1I, K1J, K1K, K1L, K1M, K1N, K1P, K1Q, K1R,      \
-    K2A, K2B, K2C, K2D, K2E, K2F, K2G, K2H, K2I, K2J, K2K, K2L,      K2N, K2P, K2Q, K2R, K2S, \
-    K3A,      K3C, K3D, K3E, K3F, K3G, K3H, K3I, K3J, K3K, K3L, K3M, K3N, K3P, K3Q, K3R,      \
-    K4A, K4B, K4C,                K4I,                K4K, K4L, K4M, K4N, K4P, K4Q, K4R, K4S  \
-) KEYMAP_NORMAL( \
-    K0A, K0B, K0C, K0D, K0E, K0F, K0G, K0H, K0I, K0J, K0K, K0L, K0M, K0N, K0P, K0Q, K0R, K0S, \
-    K1A, K1B, K1C, K1D, K1E, K1F, K1G, K1H, K1I, K1J, K1K, K1L, K1M, K1N, K1P, K1Q, K1R, NO,  \
-    K2A, K2B, K2C, K2D, K2E, K2F, K2G, K2H, K2I, K2J, K2K, K2L, NO,  K2N, K2P, K2Q, K2R, K2S, \
-    K3A, NO,  K3C, K3D, K3E, K3F, K3G, K3H, K3I, K3J, K3K, K3L, K3M, K3N, K3P, K3Q, K3R, NO,  \
-    K4A, K4B, K4C,                K4I,                K4K, K4L, K4M, K4N, K4P, K4Q, K4R, K4S  \
-)
+// /* ANSI valiant. No extra keys for ISO */
+// #define KEYMAP_ANSI( \
+//     K0A, K0B, K0C, K0D, K0E, K0F, K0G, K0H, K0I, K0J, K0K, K0L, K0M, K0N, K0P, K0Q, K0R, K0S, \
+//     K1A, K1B, K1C, K1D, K1E, K1F, K1G, K1H, K1I, K1J, K1K, K1L, K1M, K1N, K1P, K1Q, K1R,      \
+//     K2A, K2B, K2C, K2D, K2E, K2F, K2G, K2H, K2I, K2J, K2K, K2L,      K2N, K2P, K2Q, K2R, K2S, \
+//     K3A,      K3C, K3D, K3E, K3F, K3G, K3H, K3I, K3J, K3K, K3L, K3M, K3N, K3P, K3Q, K3R,      \
+//     K4A, K4B, K4C,                K4I,                K4K, K4L, K4M, K4N, K4P, K4Q, K4R, K4S  \
+// ) KEYMAP_NORMAL( \
+//     K0A, K0B, K0C, K0D, K0E, K0F, K0G, K0H, K0I, K0J, K0K, K0L, K0M, K0N, K0P, K0Q, K0R, K0S, \
+//     K1A, K1B, K1C, K1D, K1E, K1F, K1G, K1H, K1I, K1J, K1K, K1L, K1M, K1N, K1P, K1Q, K1R, NO,  \
+//     K2A, K2B, K2C, K2D, K2E, K2F, K2G, K2H, K2I, K2J, K2K, K2L, NO,  K2N, K2P, K2Q, K2R, K2S, \
+//     K3A, NO,  K3C, K3D, K3E, K3F, K3G, K3H, K3I, K3J, K3K, K3L, K3M, K3N, K3P, K3Q, K3R, NO,  \
+//     K4A, K4B, K4C,                K4I,                K4K, K4L, K4M, K4N, K4P, K4Q, K4R, K4S  \
+// )
 
+#ifndef GH60_REV_CHN
 
 #define KEYMAP_AK60( \
-    K00, K01, K02, K03, K04, K05, K06, K07, K08, K09, K0A, K0B, K0C, K0D, K2C, \
+    K00, K01, K02, K03, K04, K05, K06, K07, K08, K09, K0A, K0B, K0C, K0D, \
     K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K1A, K1B, K1C, K1D, \
     K20, K21, K22, K23, K24, K25, K26, K27, K28, K29, K2A, K2B,      K2D, \
     K30, K31, K32, K33, K34, K35, K36, K37, K38, K39, K3A, K3B, K3C, K3D, \
@@ -88,12 +89,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ) KEYMAP_NORMAL( \
     K00, K01, K02, K03, K04, K05, K06, K07, K08, K09, K0A, K0B, K0C, K0D, NO, NO, NO, NO, \
     K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K1A, K1B, K1C, K1D, NO, NO, NO, NO, \
-    K20, K21, K22, K23, K24, K25, K26, K27, K28, K29, K2A, K2B, K2C, K2D, NO, NO, NO, NO, \
+    K20, K21, K22, K23, K24, K25, K26, K27, K28, K29, K2A, K2B, NO,  K2D, NO, NO, NO, NO, \
     K30, K31, K32, K33, K34, K35, K36, K37, K38, K39, K3A, K3B, K3C, K3D, NO, NO, NO, NO, \
     K40, K41, K42,           K45,                     K4A, K4B, K4C, K4D, NO, NO, NO, NO  \
 )
 
-#define KEYMAP_AK60B( \
+#endif
+
+#ifdef GH60_REV_CHN
+
+#define KEYMAP_AK60( \
     K00, K01, K02, K03, K04, K05, K06, K07, K08, K09, K0A, K0B, K0C, K0D, \
     K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K1A, K1B, K1C, K1D, \
     K20, K21, K22, K23, K24, K25, K26, K27, K28, K29, K2A, K2B,      K2D, \
@@ -106,5 +111,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     { KC_##K30, KC_##K31, KC_##K32, KC_##K33, KC_##K34, KC_##K35, KC_##K36, KC_##K37, KC_##K38, KC_##K39, KC_##K3A, KC_##K3B, KC_##K3C, KC_##K3D }, \
     { KC_##K40, KC_##K41, KC_##K42, KC_NO,    KC_NO,    KC_##K45, KC_NO,    KC_NO,    KC_NO,    KC_NO,    KC_##K4A, KC_##K4B, KC_##K4C, KC_##K4D }  \
 }
+
+#endif
 
 #endif
