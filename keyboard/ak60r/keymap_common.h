@@ -78,8 +78,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //     K4A, K4B, K4C,                K4I,                K4K, K4L, K4M, K4N, K4P, K4Q, K4R, K4S  \
 // )
 
-#ifndef GH60_REV_CHN
-
 #define KEYMAP_AK60( \
     K00, K01, K02, K03, K04, K05, K06, K07, K08, K09, K0A, K0B, K0C, K0D, \
     K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K1A, K1B, K1C, K1D, \
@@ -94,11 +92,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     K40, K41, K42,           K45,                     K4A, K4B, K4C, K4D, NO, NO, NO, NO  \
 )
 
-#endif
-
-#ifdef GH60_REV_CHN
-
-#define KEYMAP_AK60( \
+#define KEYMAP_AK60B( \
     K00, K01, K02, K03, K04, K05, K06, K07, K08, K09, K0A, K0B, K0C, K0D, \
     K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K1A, K1B, K1C, K1D, \
     K20, K21, K22, K23, K24, K25, K26, K27, K28, K29, K2A, K2B,      K2D, \
@@ -111,7 +105,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     { KC_##K30, KC_##K31, KC_##K32, KC_##K33, KC_##K34, KC_##K35, KC_##K36, KC_##K37, KC_##K38, KC_##K39, KC_##K3A, KC_##K3B, KC_##K3C, KC_##K3D }, \
     { KC_##K40, KC_##K41, KC_##K42, KC_NO,    KC_NO,    KC_##K45, KC_NO,    KC_NO,    KC_NO,    KC_NO,    KC_##K4A, KC_##K4B, KC_##K4C, KC_##K4D }  \
 }
-
-#endif
 
 #endif

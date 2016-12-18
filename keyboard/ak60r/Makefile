@@ -48,7 +48,7 @@ TMK_DIR = ../../tmk_core
 TARGET_DIR = .
 
 # project specific files
-SRC =	matrix.c \
+SRC =	matrix_$(MATRIX).c \
 	led.c
 
 ifdef KEYMAP
